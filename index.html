@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="dark">
+    <meta name="theme-color" content="#1a1b26">
+    <title>~/startpage</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%231a1b26'/%3E%3Cpath d='M10 11l5 5-5 5' fill='none' stroke='%23bb9af7' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M17 21h5' stroke='%237aa2f7' stroke-width='2.6' stroke-linecap='round'/%3E%3C/svg%3E">
+    <link rel="stylesheet" type="text/css" href="style.css">
+</head>
+
+<body>
+    <header class="topbar">
+        <p class="prompt"><span class="sigil">&gt;</span> vim ~/today.md<span class="cursor" aria-hidden="true">_</span></p>
+        <time class="clock" id="clock"></time>
+    </header>
+
+    <main class="stage">
+        <figure class="frames" role="img" aria-label="A looping illustration of a cat">
+            <img class="frame is-active" src="Frame1.webp" alt="" width="700" height="700" decoding="async" fetchpriority="high">
+            <img class="frame" src="Frame2.webp" alt="" width="600" height="448" decoding="async">
+            <img class="frame" src="Frame3.webp" alt="" width="640" height="640" decoding="async">
+        </figure>
+
+        <nav class="bookmarks" aria-label="Bookmarks">
+            <section class="category">
+                <h2 class="title">work</h2>
+                <ul>
+                    <li><a href="https://gmail.com">gmail</a></li>
+                    <li><a href="https://linkedin.com">linkedin</a></li>
+                    <li><a href="https://vim.rtorr.com/">vim</a></li>
+                </ul>
+            </section>
+
+            <section class="category">
+                <h2 class="title">dev</h2>
+                <ul>
+                    <li><a href="https://github.com/">github</a></li>
+                    <li><a href="https://lobste.rs/">lobste.rs</a></li>
+                    <li><a href="https://devdocs.io/">devdocs</a></li>
+                    <li><a href="https://mankier.com/">mankier</a></li>
+                </ul>
+            </section>
+
+            <section class="category">
+                <h2 class="title"><a class="title-link" href="https://reddit.com">reddit</a></h2>
+                <ul>
+                    <li><a href="https://reddit.com/r/programming/">programming</a></li>
+                    <li><a href="https://reddit.com/r/selfhosted/">selfhosted</a></li>
+                    <li><a href="https://reddit.com/r/unixporn/">unixporn</a></li>
+                    <li><a href="https://reddit.com/r/mechanicalkeyboards/">mk</a></li>
+                </ul>
+            </section>
+
+            <section class="category">
+                <h2 class="title">play</h2>
+                <ul>
+                    <li><a href="https://monkeytype.com/">monkeytype</a></li>
+                    <li><a href="https://youtube.com/">youtube</a></li>
+                    <li><a href="https://twitch.tv/">twitch</a></li>
+                    <li><a href="https://netflix.com/">netflix</a></li>
+                </ul>
+            </section>
+
+            <section class="category">
+                <h2 class="title">ai</h2>
+                <ul>
+                    <li><a href="https://chatgpt.com/">chatgpt</a></li>
+                    <li><a href="https://claude.ai/">claude</a></li>
+                    <li><a href="https://gemini.google.com/">gemini</a></li>
+                    <li><a href="https://copilot.microsoft.com/">copilot</a></li>
+                </ul>
+            </section>
+        </nav>
+    </main>
+
+    <footer class="footer">
+        <button class="hint" id="search-open" type="button" aria-keyshortcuts="/">
+            <span class="key" aria-hidden="true">/</span> search
+        </button>
+    </footer>
+
+    <div class="search" id="search" hidden>
+        <form class="search-form" role="search" action="https://www.google.com/search" method="get">
+            <span class="sigil" aria-hidden="true">&gt;</span>
+            <input class="search-input" id="q" name="q" type="text" placeholder="search the web"
+                aria-label="Search the web" autocomplete="off" spellcheck="false" enterkeyhint="search">
+            <span class="key" aria-hidden="true">enter</span>
+        </form>
+    </div>
+
+    <script>
+        (function () {
+            var clock = document.getElementById("clock");
+            var search = document.getElementById("search");
+            var input = document.getElementById("q");
+            var trigger = document.getElementById("search-open");
+            var page = [document.querySelector(".topbar"), document.querySelector(".stage"), document.querySelector(".footer")];
+            var frames = Array.prototype.slice.call(document.querySelectorAll(".frames .frame"));
+
+            function setPageInert(state) {
+                page.forEach(function (region) {
+                    if (!region) return;
+                    if (state) {
+                        region.setAttribute("inert", "");
+                    } else {
+                        region.removeAttribute("inert");
+                    }
+                });
+            }
+
+            if (frames.length > 1) {
+                var frameIndex = 0;
+                // Frames are played in filename order, like the gif they replaced.
+                var FRAME_MS = 1000;
+                setInterval(function () {
+                    frames[frameIndex].classList.remove("is-active");
+                    frameIndex = (frameIndex + 1) % frames.length;
+                    frames[frameIndex].classList.add("is-active");
+                }, FRAME_MS);
+            }
+
+            if (clock) {
+                var days = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
+                var months = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
+
+                (function tick() {
+                    var now = new Date();
+                    var hh = String(now.getHours()).padStart(2, "0");
+                    var mm = String(now.getMinutes()).padStart(2, "0");
+
+                    clock.textContent = days[now.getDay()] + " " + now.getDate() + " " +
+                        months[now.getMonth()] + " · " + hh + ":" + mm;
+                    clock.setAttribute("datetime", now.toISOString());
+                    // Wake up just after the next minute so the display stays in sync.
+                    setTimeout(tick, 60000 - (now.getSeconds() * 1000 + now.getMilliseconds()) + 50);
+                })();
+            }
+
+            function openSearch() {
+                search.hidden = false;
+                document.body.classList.add("is-searching");
+                setPageInert(true);
+                input.focus();
+                input.select();
+            }
+
+            function closeSearch() {
+                if (search.hidden) return;
+                search.hidden = true;
+                document.body.classList.remove("is-searching");
+                setPageInert(false);
+                input.blur();
+            }
+
+            trigger.addEventListener("click", function () {
+                if (search.hidden) {
+                    openSearch();
+                } else {
+                    closeSearch();
+                }
+            });
+
+            search.addEventListener("submit", function () {
+                // Let the form navigate, but collapse it so the page is clean on return.
+                search.hidden = true;
+                document.body.classList.remove("is-searching");
+                setPageInert(false);
+            });
+
+            document.addEventListener("click", function (event) {
+                if (search.hidden) return;
+                var target = event.target;
+                if (!(target instanceof Element)) return;
+                if (target.closest(".search-form") || trigger.contains(target)) return;
+                closeSearch();
+            });
+
+            document.addEventListener("keydown", function (event) {
+                if (event.key === "Escape") {
+                    closeSearch();
+                    return;
+                }
+
+                var typing = document.activeElement && document.activeElement.tagName === "INPUT";
+
+                if (event.key === "/" && !typing && !event.metaKey && !event.ctrlKey && !event.altKey) {
+                    event.preventDefault();
+                    openSearch();
+                }
+            });
+        })();
+    </script>
+</body>
+
+</html>

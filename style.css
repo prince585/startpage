@@ -1,0 +1,439 @@
+:root {
+  /* Tokyo Night palette */
+  --bg: #1a1b26;
+  --bg-secondary: #16161e;
+  --surface: #24283b;
+  --border: #292e42;
+
+  /* Typography */
+  --text: #c0caf5;
+  --text-muted: #787c99;
+  --text-heading: #a9b1d6;
+
+  /* Accents */
+  --accent: #7aa2f7;
+  --accent-secondary: #bb9af7;
+  --accent-hover: #7dcfff;
+
+  /* Pixel-art panel */
+  --art-bg: #000000;
+  --art-border: #292e42;
+
+  --font-mono: "Fira Code", "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --pad: clamp(1.5rem, 4vw, 3rem);
+  --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--bg);
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(1.5rem, 5vh, 3rem);
+  min-height: 100vh;
+  min-height: 100dvh;
+  margin: 0;
+  padding: var(--pad);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 16px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Painted once on its own fixed layer so the glows never repaint on scroll. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(120% 80% at 50% -10%, rgb(187 154 247 / 7%), transparent 55%),
+    radial-gradient(70% 60% at 100% 105%, rgb(122 162 247 / 5%), transparent 60%);
+}
+
+::selection {
+  background: var(--accent);
+  color: var(--bg-secondary);
+}
+
+.topbar {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  font-size: 0.8rem;
+  letter-spacing: 0.04em;
+  animation: rise 500ms var(--ease) both;
+}
+
+.prompt {
+  margin: 0;
+  color: var(--accent-secondary);
+  white-space: nowrap;
+}
+
+.sigil {
+  color: var(--accent);
+}
+
+.cursor {
+  animation: blink 1.1s steps(1, end) infinite;
+}
+
+.clock {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  letter-spacing: 0.14em;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.stage {
+  flex: 1;
+  display: grid;
+  grid-template-columns: clamp(220px, 34vw, 440px) minmax(0, 1fr);
+  align-items: center;
+  align-content: center;
+  gap: clamp(2rem, 6vw, 5rem);
+  width: 100%;
+  max-width: 1080px;
+  margin: 0 auto;
+}
+
+/* Frames are stacked in one fixed box so swapping them never shifts the layout.
+   Each source has a black canvas, so the plate matches it and contain never crops. */
+.frames {
+  position: relative;
+  margin: 0;
+  width: 100%;
+  aspect-ratio: 1;
+  overflow: hidden;
+  border-radius: 12px;
+  background: var(--art-bg);
+  box-shadow:
+    0 0 0 1px var(--art-border),
+    0 30px 60px -30px var(--bg-secondary);
+  animation: rise 600ms var(--ease) 40ms both;
+}
+
+.frame {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  opacity: 0;
+  transition: opacity 240ms var(--ease);
+}
+
+.frame.is-active {
+  opacity: 1;
+}
+
+.bookmarks {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(1.75rem, 3.5vw, 2.75rem) clamp(1.5rem, 4vw, 3.5rem);
+}
+
+.category {
+  min-width: 0;
+  animation: rise 600ms var(--ease) both;
+}
+
+.category:nth-child(2) {
+  animation-delay: 50ms;
+}
+
+.category:nth-child(3) {
+  animation-delay: 100ms;
+}
+
+.category:nth-child(4) {
+  animation-delay: 150ms;
+}
+
+.category:nth-child(5) {
+  animation-delay: 200ms;
+}
+
+.title {
+  margin: 0 0 0.8rem;
+  padding-bottom: 0.6rem;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--text-heading);
+}
+
+/* The one heading that is also a link, so it gets the accent blue. */
+.title-link,
+.title-link:visited {
+  color: var(--accent);
+}
+
+.title-link:hover {
+  color: var(--accent-hover);
+}
+
+ul {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+a {
+  color: var(--text);
+  text-decoration: none;
+  transition: color 160ms ease, transform 160ms ease;
+}
+
+a:visited {
+  color: var(--text-muted);
+}
+
+li a {
+  display: inline-block;
+  padding: 0.28rem 0;
+  font-size: 1rem;
+}
+
+li a:hover {
+  color: var(--accent-hover);
+  transform: translateX(3px);
+}
+
+a:focus-visible {
+  outline: 1px solid var(--accent-hover);
+  outline-offset: 3px;
+  border-radius: 2px;
+  color: var(--accent-hover);
+}
+
+.footer {
+  display: flex;
+  justify-content: flex-start;
+  animation: rise 500ms var(--ease) 260ms both;
+}
+
+.hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--text-muted);
+  font: inherit;
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  transition: color 160ms ease, opacity 160ms ease;
+}
+
+body.is-searching .hint {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.hint:hover {
+  color: var(--accent-hover);
+}
+
+.hint:focus-visible {
+  outline: 1px solid var(--accent-hover);
+  outline-offset: 4px;
+  border-radius: 2px;
+}
+
+.key {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.35rem;
+  padding: 0.05rem 0.3rem;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text-heading);
+  font-size: 0.66rem;
+  letter-spacing: 0.08em;
+  line-height: 1.5;
+}
+
+.search {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 1.25rem;
+  padding-bottom: clamp(2rem, 9vh, 5rem);
+  background: rgb(22 22 30 / 65%);
+  animation: fade 160ms ease both;
+}
+
+.search[hidden] {
+  display: none;
+}
+
+.search-form {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  width: min(560px, 100%);
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  box-shadow:
+    0 30px 60px -25px var(--bg-secondary),
+    0 0 0 1px rgb(122 162 247 / 6%);
+  transition: border-color 160ms ease, box-shadow 160ms ease;
+  animation: rise 220ms var(--ease) both;
+}
+
+.search-form:focus-within {
+  border-color: var(--accent);
+  box-shadow:
+    0 30px 60px -25px var(--bg-secondary),
+    0 0 0 3px rgb(122 162 247 / 12%);
+}
+
+.search-input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-size: 0.95rem;
+  caret-color: var(--accent);
+}
+
+.search-input::placeholder {
+  color: var(--text-muted);
+}
+
+.search-input:focus {
+  outline: none;
+}
+
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes blink {
+  0%,
+  49% {
+    opacity: 1;
+  }
+
+  50%,
+  100% {
+    opacity: 0;
+  }
+}
+
+@media (max-width: 960px) {
+  .stage {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    gap: clamp(2rem, 6vh, 3rem);
+  }
+
+  .frames {
+    width: min(320px, 60vw);
+  }
+
+  .bookmarks {
+    width: 100%;
+  }
+}
+
+@media (max-width: 520px) {
+  body {
+    gap: 1.25rem;
+    padding: 1.25rem;
+  }
+
+  .bookmarks {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.5rem 1.25rem;
+  }
+
+  .title {
+    margin-bottom: 0.6rem;
+    padding-bottom: 0.45rem;
+  }
+
+  li a {
+    padding: 0.22rem 0;
+  }
+
+  .frames {
+    width: min(240px, 58vw);
+  }
+
+  .search {
+    padding-bottom: 1.25rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .topbar,
+  .frames,
+  .category,
+  .footer,
+  .search,
+  .search-form,
+  .cursor {
+    animation: none;
+  }
+
+  a,
+  .hint,
+  .frame,
+  .search-form {
+    transition: none;
+  }
+
+  li a:hover {
+    transform: none;
+  }
+}
